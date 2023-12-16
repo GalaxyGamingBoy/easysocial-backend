@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node dist/main.js",
+    "start": "node ./dist/src/main.js",
     "build:start": "pnpm run build && pnpm run start",
     "migrate": "node ./migrate.js"
   },
