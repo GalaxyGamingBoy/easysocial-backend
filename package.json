@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/main.js",
-    "build:start": "pnpm run build && pnpm run start"
+    "build:start": "pnpm run build && pnpm run start",
+    "migrate": "node ./migrate.js"
   },
   "repository": {
     "type": "git",
