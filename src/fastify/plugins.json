@@ -1,42 +1,36 @@
 {
-    "cors": {
-        "origin": "*"
+  "cors": {
+    "origin": "*"
+  },
+  "swagger": {
+    "info": {
+      "title": "EasySocial",
+      "description": "EasySocial is a FOSS social media site.",
+      "version": "0.0.1"
     },
-    "swagger": {
-        "info": {
-            "title": "EasySocial",
-            "description": "EasySocial is a FOSS social media site.",
-            "version": "0.0.1"
-        },
-        "host": "localhost",
-        "schemes": [
-            "https"
-        ],
-        "consumes": [
-            "application/json"
-        ],
-        "produces": [
-            "application/json"
-        ],
-        "tags": [
-            {
-                "name": "user",
-                "description": "User related methods"
-            },
-            {
-                "name": "auth",
-                "description": "Authentication related methods"
-            },
-            {
-                "name": "posts",
-                "description": "Post related methods"
-            }
-        ]
-    },
-    "swagger-ui": {
-        "routePrefix": "/api/docs",
-        "uiConfig": {
-            "deepLinking": true
-        }
+    "host": "localhost",
+    "schemes": ["https"],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "tags": [
+      {
+        "name": "auth",
+        "description": "Authentication related methods"
+      },
+      {
+        "name": "user",
+        "description": "User related methods"
+      },
+      {
+        "name": "posts",
+        "description": "Post related methods"
+      }
+    ]
+  },
+  "swagger-ui": {
+    "routePrefix": "/api/docs",
+    "uiConfig": {
+      "deepLinking": true
     }
+  }
 }

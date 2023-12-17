@@ -9,41 +9,41 @@
 */
 
 import {
-    pgEnum,
-    pgTable,
-    uuid,
-    text,
-    varchar,
-    index,
+  index,
+  pgEnum,
+  pgTable,
+  text,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const oauthProviderEnum = pgEnum("oauth_provider", [
-    "github",
-    "google",
-    "microsoft",
+  "github",
+  "google",
+  "microsoft",
 ]);
 
 export const users = pgTable("users", {
-    id: uuid("id").defaultRandom().primaryKey(),
-    email: varchar("email", { length: 320 }),
-    oauthProvider: oauthProviderEnum("oauth_provider"),
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 320 }),
+  oauthProvider: oauthProviderEnum("oauth_provider"),
 });
 
 export const profiles = pgTable(
-    "profiles",
-    {
-        id: uuid("id").defaultRandom().primaryKey(),
-        owner: uuid("owner")
-            .references(() => users.id)
-            .unique()
-            .notNull(),
-        username: varchar("username", { length: 24 }).unique().notNull(),
-        displayName: text("display_name").notNull(),
-        bio: text("bio"),
-    },
-    (profiles) => {
-        return {
-            usernameIdx: index("username_idx").on(profiles.username),
-        };
-    }
+  "profiles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    owner: uuid("owner")
+      .references(() => users.id)
+      .unique()
+      .notNull(),
+    username: varchar("username", { length: 24 }).unique().notNull(),
+    displayName: text("display_name").notNull(),
+    bio: text("bio"),
+  },
+  (profiles) => {
+    return {
+      usernameIdx: index("username_idx").on(profiles.username),
+    };
+  },
 );
