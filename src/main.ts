@@ -7,7 +7,12 @@ import Fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { FromSchema } from "json-schema-to-ts";
 
 import { providers } from "./accounts/oauth.js";
-import { genOauth } from "./accounts/users.js";
+import {
+  createUser,
+  doesUserExist,
+  genOauth,
+  loginGithub,
+} from "./accounts/users.js";
 import config from "./fastify/config.js";
 import routes from "./fastify/routes.js";
 
@@ -50,6 +55,43 @@ fastify.get(
       302,
       genOauth(request.query.provider as providers) || process.env.HOST || "",
     );
+  },
+);
+
+fastify.get(
+  "/api/oauth/github/",
+  { schema: routes["/api"]["/oauth"]["/github"] },
+  async (
+    req: FastifyRequest<{
+      Querystring: FromSchema<
+        (typeof routes)["/api"]["/oauth"]["/github"]["querystring"]
+      >;
+    }>,
+    rep: FastifyReply,
+  ) => {
+    const ghUser = await loginGithub(req.query.code, req.query.state);
+
+    if (ghUser) {
+      const userExists = await doesUserExist(
+        ghUser.email || "",
+        ghUser.oauthProvider as providers,
+      );
+
+      if (!userExists[0]) {
+        const user = await createUser(ghUser);
+        return { jwt: fastify.jwt.sign(user) };
+      }
+
+      return {
+        jwt: fastify.jwt.sign(userExists[1]),
+      };
+    }
+
+    rep.code(401);
+    return {
+      state: req.query.state,
+      msg: "An error occured with authenticating the user.",
+    };
   },
 );
 

@@ -1,6 +1,7 @@
 import cache from "node-cache";
 import { v4 } from "uuid";
 
+import { and, eq } from "drizzle-orm";
 import drizzle from "../db/drizzle.js";
 import { users as usersTable } from "../db/schema.js";
 import {
@@ -55,4 +56,28 @@ export const loginGithub = async (
   stateCache.del(state);
 
   return await getGithubUser(await getGithubToken(code));
+};
+
+export const doesUserExist = async (
+  email: string,
+  provider: oauthProvider,
+): Promise<[boolean, User]> => {
+  const query = await db
+    .select()
+    .from(usersTable)
+    .where(
+      and(eq(usersTable.email, email), eq(usersTable.oauthProvider, provider)),
+    )
+    .limit(1);
+
+  return [query.length > 0, query[0]];
+};
+
+export const createUser = async (user: User): Promise<User> => {
+  const query = await db
+    .insert(usersTable)
+    .values({ email: user.email, oauthProvider: user.oauthProvider })
+    .returning();
+
+  return query[0];
 };

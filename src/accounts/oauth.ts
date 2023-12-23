@@ -43,7 +43,7 @@ export const getGithubUser = async (token: string): Promise<User> => {
   const req = await fetch("https://api.github.com/user", {
     headers: {
       Accept: "application/vnd.github+json",
-      Authorization: "Bearer: " + token,
+      Authorization: "Bearer " + token,
       "X-GitHub-Api-Version": "2022-11-28",
     },
   }).then((d) => d.json());
