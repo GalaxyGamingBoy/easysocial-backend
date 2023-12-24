@@ -14,7 +14,7 @@ import {
   getGoogleUser,
   getMicrosoftToken,
   getMicrosoftUser,
-  providers as oauthProvider,
+  providers,
 } from "./oauth.js";
 type User = typeof usersTable.$inferSelect;
 
@@ -30,18 +30,18 @@ const stateCache = new cache({
  * @param provider The service provider
  * @returns The OAuth url to redirect to
  */
-export const genOauth = (provider: oauthProvider): string | void => {
+export const genOauth = (provider: providers): string | void => {
   const state = v4();
   const redirect = `https://${process.env.HOST}/api/oauth/${provider}/`;
 
   stateCache.set(state, provider);
   console.log(redirect);
 
-  if (provider === oauthProvider.GITHUB) {
+  if (provider === providers.GITHUB) {
     return genGithubURL(state, redirect);
-  } else if (provider === oauthProvider.GOOGLE) {
+  } else if (provider === providers.GOOGLE) {
     return genGoogleURL(state, redirect);
-  } else if (provider === oauthProvider.MICROSOFT) {
+  } else if (provider === providers.MICROSOFT) {
     return genMicrosoftURL(state, redirect);
   }
 };
@@ -57,10 +57,7 @@ export const loginGithub = async (
   code: string,
   state: string,
 ): Promise<User | void> => {
-  if (
-    !stateCache.has(state) ||
-    stateCache.get(state) !== oauthProvider.GITHUB
-  ) {
+  if (!stateCache.has(state) || stateCache.get(state) !== providers.GITHUB) {
     return;
   }
   stateCache.del(state);
@@ -79,10 +76,7 @@ export const loginGoogle = async (
   code: string,
   state: string,
 ): Promise<User | void> => {
-  if (
-    !stateCache.has(state) ||
-    stateCache.get(state) !== oauthProvider.GOOGLE
-  ) {
+  if (!stateCache.has(state) || stateCache.get(state) !== providers.GOOGLE) {
     return;
   }
   stateCache.del(state);
@@ -102,10 +96,7 @@ export const loginMicrosoft = async (
   code: string,
   state: string,
 ): Promise<User | void> => {
-  if (
-    !stateCache.has(state) ||
-    stateCache.get(state) !== oauthProvider.MICROSOFT
-  ) {
+  if (!stateCache.has(state) || stateCache.get(state) !== providers.MICROSOFT) {
     return;
   }
   stateCache.del(state);
@@ -123,7 +114,7 @@ export const loginMicrosoft = async (
  */
 export const doesUserExist = async (
   email: string,
-  provider: oauthProvider,
+  provider: providers,
 ): Promise<[boolean, User]> => {
   const query = await db
     .select()
