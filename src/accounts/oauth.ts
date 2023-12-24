@@ -19,6 +19,17 @@ export const genGithubURL = (state: string, redirect: string): string => {
 };
 
 /**
+ * Generates the google URL to redirect to
+ *
+ * @param state The state to provide google with
+ * @param redirect The redirect uri back to this app
+ * @returns The reidrect url
+ */
+export const genGoogleURL = (state: string, redirect: string): string => {
+  return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.OAUTH_GOOGLE_ID}&redirect_uri=${redirect}&state=${state}&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
+};
+
+/**
  * Gets a github access token from the temp code
  *
  * @param code The code provided by github
@@ -39,6 +50,12 @@ export const getGithubToken = async (code: string): Promise<string> => {
   return req["access_token"];
 };
 
+/**
+ * Gets the github user for the selected access token.
+ *
+ * @param token The github access token
+ * @returns The user
+ */
 export const getGithubUser = async (token: string): Promise<User> => {
   const req = await fetch("https://api.github.com/user", {
     headers: {
@@ -49,4 +66,49 @@ export const getGithubUser = async (token: string): Promise<User> => {
   }).then((d) => d.json());
 
   return { id: req.node_id, email: req.email, oauthProvider: "github" };
+};
+
+/**
+ * Gets a google access token from the temp code
+ *
+ * @param code The code provided by google
+ * @param redirect The redirect URL to provide google with
+ * @returns The access token
+ */
+export const getGoogleToken = async (
+  code: string,
+  redirect: string,
+): Promise<string> => {
+  const req = await fetch(`https://oauth2.googleapis.com/token`, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      client_secret: process.env.OAUTH_GOOGLE_SECRET,
+      client_id: process.env.OAUTH_GOOGLE_ID,
+      code: code,
+      redirect_uri: redirect,
+      grant_type: "authorization_code",
+    }),
+  }).then((d) => d.json());
+
+  console.log(req);
+
+  return req.access_token;
+};
+
+/**
+ * Gets the google user for the selected access token.
+ *
+ * @param token The google access token
+ * @returns The user
+ */
+export const getGoogleUser = async (token: string): Promise<User> => {
+  const req = await fetch(
+    `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`,
+  ).then((d) => d.json());
+
+  return { id: req.sub, email: req.email, oauthProvider: providers.GOOGLE };
 };

@@ -6,8 +6,11 @@ import drizzle from "../db/drizzle.js";
 import { users as usersTable } from "../db/schema.js";
 import {
   genGithubURL,
+  genGoogleURL,
   getGithubToken,
   getGithubUser,
+  getGoogleToken,
+  getGoogleUser,
   providers as oauthProvider,
 } from "./oauth.js";
 type User = typeof usersTable.$inferSelect;
@@ -33,6 +36,8 @@ export const genOauth = (provider: oauthProvider): string | void => {
 
   if (provider === oauthProvider.GITHUB) {
     return genGithubURL(state, redirect);
+  } else if (provider === oauthProvider.GOOGLE) {
+    return genGoogleURL(state, redirect);
   }
 };
 
@@ -58,6 +63,36 @@ export const loginGithub = async (
   return await getGithubUser(await getGithubToken(code));
 };
 
+/**
+ * Returns a user object with information provided by google.
+ *
+ * @param code The code that was returned by google.
+ * @param state The state that was returned by google.
+ * @returns void if the state wasn't found or a User
+ */
+export const loginGoogle = async (
+  code: string,
+  state: string,
+): Promise<User | void> => {
+  if (
+    !stateCache.has(state) ||
+    stateCache.get(state) !== oauthProvider.GOOGLE
+  ) {
+    return;
+  }
+  stateCache.del(state);
+
+  const redirect = `https://${process.env.HOST}/api/oauth/google/`;
+  return await getGoogleUser(await getGoogleToken(code, redirect));
+};
+
+/**
+ * Checks if the user exists.
+ *
+ * @param email The user email
+ * @param provider The provider of the user
+ * @returns An array with 2 elements. The first is if the user is found, and the second the user
+ */
 export const doesUserExist = async (
   email: string,
   provider: oauthProvider,
@@ -73,6 +108,12 @@ export const doesUserExist = async (
   return [query.length > 0, query[0]];
 };
 
+/**
+ * Creates a user in the DB
+ *
+ * @param user The user to create
+ * @returns The user that was created
+ */
 export const createUser = async (user: User): Promise<User> => {
   const query = await db
     .insert(usersTable)
@@ -80,4 +121,16 @@ export const createUser = async (user: User): Promise<User> => {
     .returning();
 
   return query[0];
+};
+
+export const genJWTConfig = (): {
+  iss: string;
+  sub: string;
+  expiresIn: number;
+} => {
+  return {
+    iss: process.env.JWT_ISSUER || "EasySocial Issuing Service",
+    sub: process.env.JWT_SUBJECT || "EasySocial Authentication Provider",
+    expiresIn: Number(process.env.JWT_EXPIREIN) || 7890000,
+  };
 };

@@ -10,8 +10,10 @@ import { providers } from "./accounts/oauth.js";
 import {
   createUser,
   doesUserExist,
+  genJWTConfig,
   genOauth,
   loginGithub,
+  loginGoogle,
 } from "./accounts/users.js";
 import config from "./fastify/config.js";
 import routes from "./fastify/routes.js";
@@ -79,11 +81,49 @@ fastify.get(
 
       if (!userExists[0]) {
         const user = await createUser(ghUser);
-        return { jwt: fastify.jwt.sign(user) };
+        return { jwt: fastify.jwt.sign(user, genJWTConfig()) };
       }
 
       return {
-        jwt: fastify.jwt.sign(userExists[1]),
+        jwt: fastify.jwt.sign(userExists[1], genJWTConfig()),
+      };
+    }
+
+    rep.code(401);
+    return {
+      state: req.query.state,
+      msg: "An error occured with authenticating the user.",
+    };
+  },
+);
+
+fastify.get(
+  "/api/oauth/google/",
+  { schema: routes["/api"]["/oauth"]["/google"] },
+  async (
+    req: FastifyRequest<{
+      Querystring: FromSchema<
+        (typeof routes)["/api"]["/oauth"]["/google"]["querystring"]
+      >;
+    }>,
+    rep: FastifyReply,
+  ) => {
+    const gglUser = await loginGoogle(req.query.code, req.query.state);
+
+    if (gglUser) {
+      const userExists = await doesUserExist(
+        gglUser.email || "",
+        gglUser.oauthProvider as providers,
+      );
+
+      if (!userExists[0]) {
+        const user = await createUser(gglUser);
+
+        return { jwt: fastify.jwt.sign(user, genJWTConfig()) };
+      }
+
+      return {
+        jwt: fastify.jwt.sign(userExists[1], genJWTConfig()),
       };
     }
 
