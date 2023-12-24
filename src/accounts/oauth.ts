@@ -23,10 +23,21 @@ export const genGithubURL = (state: string, redirect: string): string => {
  *
  * @param state The state to provide google with
  * @param redirect The redirect uri back to this app
- * @returns The reidrect url
+ * @returns The redirect url
  */
 export const genGoogleURL = (state: string, redirect: string): string => {
   return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.OAUTH_GOOGLE_ID}&redirect_uri=${redirect}&state=${state}&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile`;
+};
+
+/**
+ * Generates the microsoft URL to redirect to
+ *
+ * @param state The state to provide microsoft with
+ * @param redirect The redirect uri back to this app
+ * @returns The redirect url
+ */
+export const genMicrosoftURL = (state: string, redirect: string): string => {
+  return `https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=${process.env.OAUTH_MICROSOFT_ID}&redirect_uri=${redirect}&state=${state}&response_type=code&response_mode=query&scope=User.Read`;
 };
 
 /**
@@ -111,4 +122,44 @@ export const getGoogleUser = async (token: string): Promise<User> => {
   ).then((d) => d.json());
 
   return { id: req.sub, email: req.email, oauthProvider: providers.GOOGLE };
+};
+
+/**
+ * Gets a microsoft access token from the temp code
+ *
+ * @param code The code provided by microsoft
+ * @param redirect The redirect URL to provide google with
+ * @returns The access token
+ */
+export const getMicrosoftToken = async (
+  code: string,
+  redirect: string,
+): Promise<string> => {
+  const req = await fetch(
+    "https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
+    {
+      mode: "cors",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: `grant_type=authorization_code&code=${code}&redirect_uri=${redirect}&client_id=${process.env.OAUTH_MICROSOFT_ID}&client_secret=${process.env.OAUTH_MICROSOFT_SECRET}&scope=User.Read`,
+    },
+  ).then((d) => d.json());
+
+  return req.access_token;
+};
+
+/**
+ * Gets the microsoft user for the selected access token.
+ *
+ * @param token The microsoft access token
+ * @returns The user
+ */
+export const getMicrosoftUser = async (token: string): Promise<User> => {
+  const req = await fetch("https://graph.microsoft.com/v1.0/me", {
+    headers: { Accept: "application/json", Authorization: "Bearer " + token },
+  }).then((d) => d.json());
+
+  return { id: req.id, email: req.mail, oauthProvider: providers.MICROSOFT };
 };

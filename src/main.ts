@@ -14,6 +14,7 @@ import {
   genOauth,
   loginGithub,
   loginGoogle,
+  loginMicrosoft,
 } from "./accounts/users.js";
 import config from "./fastify/config.js";
 import routes from "./fastify/routes.js";
@@ -119,6 +120,43 @@ fastify.get(
       if (!userExists[0]) {
         const user = await createUser(gglUser);
 
+        return { jwt: fastify.jwt.sign(user, genJWTConfig()) };
+      }
+
+      return {
+        jwt: fastify.jwt.sign(userExists[1], genJWTConfig()),
+      };
+    }
+
+    rep.code(401);
+    return {
+      state: req.query.state,
+      msg: "An error occured with authenticating the user.",
+    };
+  },
+);
+
+fastify.get(
+  "/api/oauth/microsoft/",
+  { schema: routes["/api"]["/oauth"]["/microsoft"] },
+  async (
+    req: FastifyRequest<{
+      Querystring: FromSchema<
+        (typeof routes)["/api"]["/oauth"]["/microsoft"]["querystring"]
+      >;
+    }>,
+    rep: FastifyReply,
+  ) => {
+    const msUser = await loginMicrosoft(req.query.code, req.query.state);
+
+    if (msUser) {
+      const userExists = await doesUserExist(
+        msUser.email || "",
+        msUser.oauthProvider as providers,
+      );
+
+      if (!userExists[0]) {
+        const user = await createUser(msUser);
         return { jwt: fastify.jwt.sign(user, genJWTConfig()) };
       }
 

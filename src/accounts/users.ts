@@ -7,10 +7,13 @@ import { users as usersTable } from "../db/schema.js";
 import {
   genGithubURL,
   genGoogleURL,
+  genMicrosoftURL,
   getGithubToken,
   getGithubUser,
   getGoogleToken,
   getGoogleUser,
+  getMicrosoftToken,
+  getMicrosoftUser,
   providers as oauthProvider,
 } from "./oauth.js";
 type User = typeof usersTable.$inferSelect;
@@ -38,6 +41,8 @@ export const genOauth = (provider: oauthProvider): string | void => {
     return genGithubURL(state, redirect);
   } else if (provider === oauthProvider.GOOGLE) {
     return genGoogleURL(state, redirect);
+  } else if (provider === oauthProvider.MICROSOFT) {
+    return genMicrosoftURL(state, redirect);
   }
 };
 
@@ -84,6 +89,29 @@ export const loginGoogle = async (
 
   const redirect = `https://${process.env.HOST}/api/oauth/google/`;
   return await getGoogleUser(await getGoogleToken(code, redirect));
+};
+
+/**
+ * Returns a user object with information provided by microsoft.
+ *
+ * @param code The code that was returned by microsoft.
+ * @param state The state that was returned by microsoft.
+ * @returns void if the state wasn't found or a User
+ */
+export const loginMicrosoft = async (
+  code: string,
+  state: string,
+): Promise<User | void> => {
+  if (
+    !stateCache.has(state) ||
+    stateCache.get(state) !== oauthProvider.MICROSOFT
+  ) {
+    return;
+  }
+  stateCache.del(state);
+
+  const redirect = `https://${process.env.HOST}/api/oauth/microsoft/`;
+  return await getMicrosoftUser(await getMicrosoftToken(code, redirect));
 };
 
 /**
