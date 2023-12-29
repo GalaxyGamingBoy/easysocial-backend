@@ -34,7 +34,7 @@ export const profiles = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     owner: uuid("owner")
-      .references(() => users.id)
+      .references(() => users.id, { onDelete: "cascade" })
       .unique()
       .notNull(),
     username: varchar("username", { length: 24 }).unique().notNull(),
@@ -44,6 +44,7 @@ export const profiles = pgTable(
   (profiles) => {
     return {
       usernameIdx: index("username_idx").on(profiles.username),
+      ownerIdx: index("owner_idx").on(profiles.owner),
     };
   },
 );

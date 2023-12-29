@@ -9,9 +9,15 @@
       "version": "0.0.1"
     },
     "host": "localhost",
-    "schemes": ["https"],
-    "consumes": ["application/json"],
-    "produces": ["application/json"],
+    "schemes": [
+      "https"
+    ],
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
     "tags": [
       {
         "name": "auth",

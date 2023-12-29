@@ -1,3 +1,5 @@
+import { providers } from "../../accounts/oauth.js";
+
 export default {
   "/": {
     description: `
@@ -11,7 +13,7 @@ After completion it will redirect to \`https://<URL>/oauth/<PROVIDER>\`
       properties: {
         provider: {
           type: "string",
-          enum: ["github", "google", "microsoft"],
+          enum: Object.values(providers),
         },
       },
     },

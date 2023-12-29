@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyRequest } from "fastify";
 import nodePackage from "../../package.json" assert { type: "json" };
 import plugins from "./plugins.json" assert { type: "json" };
 
@@ -14,7 +14,7 @@ if (nodePackage.version) {
   data.plugins.swagger.info.version = nodePackage.version;
 }
 
-export const jwtAuth = async (request: FastifyRequest, reply: FastifyReply) => {
+export const jwtAuth = async (request: FastifyRequest<any>, reply: any) => {
   try {
     await request.jwtVerify();
   } catch (err) {

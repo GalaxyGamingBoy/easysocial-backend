@@ -1,7 +1,7 @@
 import { users as userTable } from "../db/schema.js";
 
 type User = typeof userTable.$inferSelect;
-export const enum providers {
+export enum providers {
   GITHUB = "github",
   GOOGLE = "google",
   MICROSOFT = "microsoft",
