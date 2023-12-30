@@ -1,6 +1,6 @@
 {
   "name": "easysocial-backend",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "The backend of easysocial",
   "main": "dist/main.js",
   "scripts": {
