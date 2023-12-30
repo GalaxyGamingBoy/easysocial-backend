@@ -297,7 +297,7 @@ fastify.put(
 );
 
 fastify.get(
-  "/api/profile/me/",
+  "/api/profiles/me/",
   { schema: routes["/api"]["/profiles"]["/me/"], onRequest: [jwtAuth] },
   async (req: FastifyRequest, rep: FastifyReply) => {
     const profile = await profileExist(req.user.id);
