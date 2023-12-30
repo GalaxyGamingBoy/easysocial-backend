@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import drizzle from "../db/drizzle.js";
 import { profiles as profilesTable } from "../db/schema.js";
 type Profile = typeof profilesTable.$inferSelect;
@@ -130,4 +130,18 @@ export const profileExistsByUsername = async (
     .limit(1);
 
   return [query.length > 0, query[0]];
+};
+
+export const getProfileByUsernameSearch = async (
+  searchQuery: string,
+): Promise<Array<Profile>> => {
+  const query = await db
+    .select()
+    .from(profilesTable)
+    .where(
+      sql`to_tsvector('simple', ${profilesTable.username}) @@ to_tsquery('simple', ${searchQuery})`,
+    )
+    .limit(12);
+
+  return query;
 };

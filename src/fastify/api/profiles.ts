@@ -3,6 +3,7 @@ import { FromSchema } from "json-schema-to-ts";
 import {
   createProfile,
   deleteProfile,
+  getProfileByUsernameSearch,
   profileExist,
   profileExistsByID,
   profileExistsByUsername,
@@ -197,6 +198,39 @@ If there is a conflict an HTTP code 409 will be returned. See \`conflict\` field
     },
     tags: ["user"],
   },
+  "/search/": {
+    description: `Searches the database for usernames using the query(\`q\`).
+Returns up to *12* users.`,
+    querystring: {
+      type: "object",
+      required: ["q"],
+      properties: {
+        q: { type: "string" },
+      },
+    },
+    response: {
+      200: {
+        type: "object",
+        required: ["results", "resultsCount"],
+        properties: {
+          resultsCount: { type: "number", default: 0 },
+          results: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                username: { type: "string" },
+                displayName: { type: "string" },
+                bio: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+    tags: ["user"],
+  },
 } as const;
 
 export default (fastify: FastifyInstance, _: any, done: any) => {
@@ -367,6 +401,20 @@ export default (fastify: FastifyInstance, _: any, done: any) => {
       }
 
       return profile[1];
+    },
+  );
+
+  fastify.get(
+    "/profiles/search/",
+    { schema: routes["/search/"] },
+    async (
+      req: FastifyRequest<{
+        Querystring: FromSchema<(typeof routes)["/search/"]["querystring"]>;
+      }>,
+    ) => {
+      const query = await getProfileByUsernameSearch(req.query.q);
+
+      return { resultsCount: query.length, results: query };
     },
   );
 
