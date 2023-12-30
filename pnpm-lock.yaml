@@ -35,6 +35,9 @@ dependencies:
   pg:
     specifier: ^8.11.3
     version: 8.11.3
+  swagger-themes:
+    specifier: ^1.2.30
+    version: 1.2.30
   typescipt:
     specifier: ^1.0.0
     version: 1.0.0
@@ -2278,6 +2281,10 @@ packages:
     dependencies:
       copy-anything: 3.0.5
     dev: true
+
+  /swagger-themes@1.2.30:
+    resolution: {integrity: sha512-OOk1gMfu50knSui4ncnOGtQEw8snOkMCLiOWVLqO0IT1SNYJC83MBWtRwMWSYmaC+m51XdNBlZ030T4t6viNvg==}
+    dev: false
 
   /thread-stream@2.4.1:
     resolution: {integrity: sha512-d/Ex2iWd1whipbT681JmTINKw0ZwOUBZm7+Gjs64DHuX34mmw8vJL2bFAaNacaW72zYiTJxSHi5abUuOi5nsfg==}

@@ -37,6 +37,14 @@
     "routePrefix": "/api/docs",
     "uiConfig": {
       "deepLinking": true
+    },
+    "theme": {
+      "css": [
+        {
+          "filename": "theme.css",
+          "content": ""
+        }
+      ]
     }
   }
 }

@@ -28,7 +28,7 @@ await fastify.register(fastifySWAGGER, {
     securityDefinitions: {
       jwt: {
         in: "header",
-        name: "JSON Web Token",
+        name: "Authorization",
         type: "apiKey",
         description: "The JSON Web Token returned by an OAuth provider.",
       },
@@ -39,10 +39,10 @@ await fastify.register(fastifySWAGGERUI, config.plugins["swagger-ui"]);
 await fastify.register(fastifyJWT, { secret: process.env.JWT_SECRET || "" });
 
 // Routes
+await fastify.register(rOauth, { prefix: "/api" });
 await fastify.register(
   async (fastify: FastifyInstance, _: any, done: any) => {
     await fastify.register(rIndex);
-    await fastify.register(rOauth);
     await fastify.register(rProfiles);
     done();
   },
