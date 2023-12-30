@@ -1,4 +1,6 @@
-export default {
+import { FastifyInstance } from "fastify";
+
+const routes = {
   "/api": {
     response: {
       "200": {
@@ -14,3 +16,17 @@ export default {
     description: "The index route of easysocial",
   },
 } as const;
+
+export default (fastify: FastifyInstance, _: any, done: any) => {
+  fastify.get(
+    "/",
+    {
+      schema: routes["/api"],
+    },
+    async () => {
+      return { msg: "Hello, World!" };
+    },
+  );
+
+  done();
+};
