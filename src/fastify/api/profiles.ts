@@ -5,6 +5,7 @@ import {
   deleteProfile,
   profileExist,
   profileExistsByID,
+  profileExistsByUsername,
   updateProfile,
   usernameExists,
 } from "../../accounts/profiles.js";
@@ -80,13 +81,12 @@ If there is a conflict an HTTP code 409 will be returned. See \`conflict\` field
     response: {
       200: {
         type: "object",
-        required: ["id", "username", "displayName", "bio", "owner"],
+        required: ["id", "username", "displayName", "bio"],
         properties: {
           id: { type: "string" },
           username: { type: "string" },
           displayName: { type: "string" },
           bio: { type: "string" },
-          owner: { type: "string" },
         },
       },
       404: {
@@ -115,13 +115,12 @@ If there is a conflict an HTTP code 409 will be returned. See \`conflict\` field
     response: {
       200: {
         type: "object",
-        required: ["id", "username", "displayName", "bio", "owner"],
+        required: ["id", "username", "displayName", "bio"],
         properties: {
           id: { type: "string" },
           username: { type: "string" },
           displayName: { type: "string" },
           bio: { type: "string" },
-          owner: { type: "string" },
         },
       },
       404: {
@@ -148,13 +147,43 @@ If there is a conflict an HTTP code 409 will be returned. See \`conflict\` field
     response: {
       200: {
         type: "object",
-        required: ["id", "username", "displayName", "bio", "owner"],
+        required: ["id", "username", "displayName", "bio"],
         properties: {
           id: { type: "string" },
           username: { type: "string" },
           displayName: { type: "string" },
           bio: { type: "string" },
-          owner: { type: "string" },
+        },
+      },
+      404: {
+        type: "object",
+        required: ["msg"],
+        properties: {
+          status: { type: "boolean", default: false },
+          msg: { type: "string" },
+        },
+      },
+    },
+    tags: ["user"],
+  },
+  "/username/:username/": {
+    description: `Gets a user with the specified id.`,
+    params: {
+      type: "object",
+      required: ["username"],
+      properties: {
+        username: { type: "string" },
+      },
+    },
+    response: {
+      200: {
+        type: "object",
+        required: ["id", "username", "displayName", "bio"],
+        properties: {
+          id: { type: "string" },
+          username: { type: "string" },
+          displayName: { type: "string" },
+          bio: { type: "string" },
         },
       },
       404: {
@@ -305,6 +334,29 @@ export default (fastify: FastifyInstance, _: any, done: any) => {
       }
 
       const profile = await profileExistsByID(req.params.id);
+      if (!profile[0]) {
+        rep.code(404);
+        return {
+          status: false,
+          conflict: "profile",
+          msg: "A profile with the same user owner id was not found.",
+        };
+      }
+
+      return profile[1];
+    },
+  );
+
+  fastify.get(
+    "/profiles/username/:username/",
+    { schema: routes["/username/:username/"] },
+    async (
+      req: FastifyRequest<{
+        Params: FromSchema<(typeof routes)["/username/:username/"]["params"]>;
+      }>,
+      rep: FastifyReply,
+    ) => {
+      const profile = await profileExistsByUsername(req.params.username);
       if (!profile[0]) {
         rep.code(404);
         return {

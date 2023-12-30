@@ -113,3 +113,21 @@ export const profileExistsByID = async (
 
   return [query.length > 0, query[0]];
 };
+
+/**
+ * Gets a profile using its Username
+ *
+ * @param profileUsername The username of the profile
+ * @returns A profile
+ */
+export const profileExistsByUsername = async (
+  profileUsername: string,
+): Promise<[boolean, Profile]> => {
+  const query = await db
+    .select()
+    .from(profilesTable)
+    .where(eq(profilesTable.username, profileUsername))
+    .limit(1);
+
+  return [query.length > 0, query[0]];
+};
