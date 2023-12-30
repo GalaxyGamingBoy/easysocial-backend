@@ -5,6 +5,7 @@ import fastifySWAGGERUI from "@fastify/swagger-ui";
 import "dotenv/config";
 import Fastify, { FastifyInstance } from "fastify";
 
+import minio from "./cdn/minio.js";
 import rIndex from "./fastify/api/index.js";
 import rOauth from "./fastify/api/oauth.js";
 import rProfiles from "./fastify/api/profiles.js";
@@ -37,6 +38,22 @@ await fastify.register(fastifySWAGGER, {
 });
 await fastify.register(fastifySWAGGERUI, config.plugins["swagger-ui"]);
 await fastify.register(fastifyJWT, { secret: process.env.JWT_SECRET || "" });
+
+// Minio
+await fastify.register(async (fastify: FastifyInstance, _: any, done: any) => {
+  const client = minio;
+
+  client
+    .makeBucket(
+      process.env.MINIO_BUCKET || "easysocial",
+      process.env.MINIO_REGION || "us-east-1",
+    )
+    .catch((e): void => {
+      fastify.log.error(`An error occured while creatign the S3 bucket! ${e}`);
+    });
+
+  done();
+});
 
 // Routes
 await fastify.register(rOauth, { prefix: "/api" });
