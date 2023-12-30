@@ -65,7 +65,7 @@ export const createProfile = async (
 
 /**
  * Updates a uesr profile
- * 
+ *
  * @param userID The owner id of the profile
  * @param username The new username, must be seperate than the last one
  * @param displayName The new displayname
@@ -94,4 +94,22 @@ export const updateProfile = async (
  */
 export const deleteProfile = async (userID: string) => {
   await db.delete(profilesTable).where(eq(profilesTable.owner, userID));
+};
+
+/**
+ * Gets a profile using its ID
+ *
+ * @param profileID The user ID of the profile
+ * @returns A profile
+ */
+export const profileExistsByID = async (
+  profileID: string,
+): Promise<[boolean, Profile]> => {
+  const query = await db
+    .select()
+    .from(profilesTable)
+    .where(eq(profilesTable.id, profileID))
+    .limit(1);
+
+  return [query.length > 0, query[0]];
 };

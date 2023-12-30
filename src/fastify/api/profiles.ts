@@ -123,4 +123,36 @@ If there is a conflict an HTTP code 409 will be returned. See \`conflict\` field
     security: [{ jwt: [] }],
     tags: ["user"],
   },
+  "/id/:id/": {
+    description: `Gets a user with the specified id.`,
+    params: {
+      type: "object",
+      required: ["id"],
+      properties: {
+        id: { type: "string" },
+      },
+    },
+    response: {
+      200: {
+        type: "object",
+        required: ["id", "username", "displayName", "bio", "owner"],
+        properties: {
+          id: { type: "string" },
+          username: { type: "string" },
+          displayName: { type: "string" },
+          bio: { type: "string" },
+          owner: { type: "string" },
+        },
+      },
+      404: {
+        type: "object",
+        required: ["msg"],
+        properties: {
+          status: { type: "boolean", default: false },
+          msg: { type: "string" },
+        },
+      },
+    },
+    tags: ["user"],
+  },
 } as const;

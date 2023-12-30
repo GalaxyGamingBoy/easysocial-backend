@@ -11,6 +11,7 @@ import {
   createProfile,
   deleteProfile,
   profileExist,
+  profileExistsByID,
   updateProfile,
   usernameExists,
 } from "./accounts/profiles.js";
@@ -25,6 +26,7 @@ import {
 } from "./accounts/users.js";
 import config, { jwtAuth } from "./fastify/config.js";
 import routes from "./fastify/routes.js";
+import uuidRegex from "./regex/uuid.js";
 
 // Config
 const fastify = Fastify({
@@ -302,6 +304,39 @@ fastify.get(
   async (req: FastifyRequest, rep: FastifyReply) => {
     const profile = await profileExist(req.user.id);
 
+    if (!profile[0]) {
+      rep.code(404);
+      return {
+        status: false,
+        conflict: "profile",
+        msg: "A profile with the same user owner id was not found.",
+      };
+    }
+
+    return profile[1];
+  },
+);
+
+fastify.get(
+  "/api/profiles/id/:id/",
+  { schema: routes["/api"]["/profiles"]["/id/:id/"] },
+  async (
+    req: FastifyRequest<{
+      Params: FromSchema<
+        (typeof routes)["/api"]["/profiles"]["/id/:id/"]["params"]
+      >;
+    }>,
+    rep: FastifyReply,
+  ) => {
+    if (!uuidRegex.test(req.params.id)) {
+      rep.code(404);
+      return {
+        status: false,
+        msg: "The param id is not a UUID",
+      };
+    }
+
+    const profile = await profileExistsByID(req.params.id);
     if (!profile[0]) {
       rep.code(404);
       return {
