@@ -97,4 +97,30 @@ If there is a conflict an HTTP code 409 will be returned. See \`conflict\` field
     security: [{ jwt: [] }],
     tags: ["user"],
   },
+  "/me/": {
+    description: `Gets the authed profile.`,
+    response: {
+      200: {
+        type: "object",
+        required: ["id", "username", "displayName", "bio", "owner"],
+        properties: {
+          id: { type: "string" },
+          username: { type: "string" },
+          displayName: { type: "string" },
+          bio: { type: "string" },
+          owner: { type: "string" },
+        },
+      },
+      404: {
+        type: "object",
+        required: ["msg"],
+        properties: {
+          status: { type: "boolean", default: false },
+          msg: { type: "string" },
+        },
+      },
+    },
+    security: [{ jwt: [] }],
+    tags: ["user"],
+  },
 } as const;

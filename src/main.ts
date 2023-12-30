@@ -296,6 +296,25 @@ fastify.put(
   },
 );
 
+fastify.get(
+  "/api/profile/me/",
+  { schema: routes["/api"]["/profiles"]["/me/"], onRequest: [jwtAuth] },
+  async (req: FastifyRequest, rep: FastifyReply) => {
+    const profile = await profileExist(req.user.id);
+
+    if (!profile[0]) {
+      rep.code(404);
+      return {
+        status: false,
+        conflict: "profile",
+        msg: "A profile with the same user owner id was not found.",
+      };
+    }
+
+    return profile[1];
+  },
+);
+
 // Run
 try {
   await fastify.listen({ port: Number(process.env.PORT) || 3000 });
